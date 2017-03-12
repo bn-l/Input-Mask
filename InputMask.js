@@ -1,7 +1,7 @@
     
     
     
-var inputMask = function (_input, _mask, _initialValue, _delimiter, _chunkSize, _maxSize, _coerceValidDate, _regexMatcher) {
+export default function (_input, _mask, _initialValue, _delimiter, _chunkSize, _maxSize, _coerceValidDate, _regexMatcher) {
 
     // -------------- OPTIONS --------------- //
 
