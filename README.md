@@ -6,7 +6,9 @@ An input mask with undo, paste and cut (but not redo) support. Should work every
 import or require InputMask.
 <br>
 The imported function takes an object {} with the following keys and their settings as values:
+
 <br>
+
 **input**: Required. A DOM reference to the input you would like to apply the mask to
 
 **mask**: Required. The input template / mask.
