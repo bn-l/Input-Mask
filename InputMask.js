@@ -1,22 +1,21 @@
-    
-    
-    
-export default function (_input, _mask, _initialValue, _delimiter, _chunkSize, _maxSize, _coerceValidDate, _regexMatcher) {
+
+
+export default function (optionsObject) {
 
     // -------------- OPTIONS --------------- //
 
 
-    var input = _input
+    var input = optionsObject.input
 
     
     
-    var mask = _mask || "  /  /    "
-    var initialValue = _initialValue || "" // default ""
-    var delimiter = _delimiter || "/"
-    var chunkSize = _chunkSize || [2,2,4]
-    var maxSize = _maxSize || 10
-    var coerceValidDate = !!_coerceValidDate
-    var regexMatcher = _regexMatcher || "^[0-9]+$"
+    var mask = optionsObject.mask || "  /  /    "
+    var initialValue = optionsObject.initialValue || ""
+    var delimiter = optionsObject.delimiter || mask.match(/[^ ]/g)[0]
+    var chunkSize = optionsObject.chunkSize || mask.split(delimiter)[0].length
+    var maxSize = optionsObject.maxSize || mask.length
+    var coerceValidDate = !!optionsObject.coerceValidDate
+    var regexMatcher = optionsObject.regexMatcher || "^[0-9]+$"
 
 
     // ------------ GLOBALS ------------ //
@@ -298,15 +297,15 @@ export default function (_input, _mask, _initialValue, _delimiter, _chunkSize, _
 
             return
         }
-        
+
 
 
         // undo or redo happened
         if (!pasteHappened && !currentChar) {
-                
 
-            undoStore.length ? 
-                (this.value = undoStore.pop(), this.setSelectionRange(start, end)) : 
+
+            undoStore.length ?
+                (this.value = undoStore.pop(), this.setSelectionRange(start, end)) :
                 (this.value = [mask], this.setSelectionRange(0, 0))
 
             undid = true
