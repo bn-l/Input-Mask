@@ -39,6 +39,6 @@ var inputMaskOptions = {
 
 }
 ```
+<br>
 
-
-
+demo: https://blueredcat.github.io/Input-Mask/
