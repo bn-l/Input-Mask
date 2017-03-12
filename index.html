@@ -2,12 +2,20 @@
 <html>
     <head>
         <title>Testing</title>
+
+        <style>
+            #theInput {
+                font-family: "Lucida Console", Monaco, monospace !important;
+            }
+        </style>
     </head>
     <body>
 
+    
+    
     <input type="text" id="theInput">
 
-    
+   
     
     <script>
 
@@ -23,12 +31,12 @@
         //
         // var initialValue = "30/10/2017"
 
-        var mask = "    -    -    -    "
-        var initialValue = ""  // default ""
-        var delimiter = '-'
-        var chunkSize = [4, 4, 4, 4]
+        var mask = "  /  /    "
+        var initialValue = "25/12/2011"  // default ""
+        var delimiter = '/'
+        var chunkSize = [2, 2, 4]
         var maxSize = mask.length
-        var coerceValidDate = false
+        var coerceValidDate = true
         var regexMatcher = "^[0-9]+$"
 
 
