@@ -329,23 +329,23 @@
 
 
             // undo or redo happened
-            if(!pasteHappened && !currentChar) {
+              if(!pasteHappened && !currentChar) {
 
-                // Have to detect if undo or redo then, when popping undo, push on redo. Clear redo
-                // and undo at same time.
-                //
-                //
-                //
-                // console.log("undo or redo");
-                // console.log(undoStore.length)
+                 Have to detect if undo or redo then, when popping undo, push on redo. Clear redo
+                 and undo at same time.
+
+
+
+                 console.log("undo or redo");
+                 console.log(undoStore.length)
 
                 console.log(currentValue);
-                //
-                // undoStore.length ? 
-                //     (this.value = undoStore.pop(), this.setSelectionRange(start, end)) : 
-                //     (this.value = [mask], this.setSelectionRange(0, 0))
-                //
-                // undid = true
+
+                 undoStore.length ? 
+                     (this.value = undoStore.pop(), this.setSelectionRange(start, end)) : 
+                     (this.value = [mask], this.setSelectionRange(0, 0))
+
+                 undid = true
             }
 
         }
