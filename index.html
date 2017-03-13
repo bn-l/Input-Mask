@@ -4,7 +4,7 @@
         <title>Testing</title>
 
         <style>
-            #theInput {
+            input {
                 font-family: "Lucida Console", Monaco, monospace !important;
             }
         </style>
@@ -12,10 +12,13 @@
     <body>
 
     
+    <p>
+        <input type="text" id="theInput">
+    </p>
     
-    <input type="text" id="theInput">
-
-   
+    <p>
+        <input type="text">
+    </p>
     
     <script>
 
@@ -31,14 +34,13 @@
         //
         // var initialValue = "30/10/2017"
 
-        var mask = "  /  /    "
-        var initialValue = "25/12/2011"  // default ""
-        var delimiter = '/'
-        var chunkSize = [2, 2, 4]
+        var mask = "    -    -    -    "
+        var initialValue = ""  // default ""
+        var delimiter = '-'
+        var chunkSize = [4, 4, 4, 4]
         var maxSize = mask.length
-        var coerceValidDate = true
+        var coerceValidDate = false
         var regexMatcher = "^[0-9]+$"
-
 
 
 
@@ -52,9 +54,9 @@
 
         var currentChar
 
-        var currentKeyCode
+        var currentKeyCode = []
 
-        var valuePriorToPaste
+        var valuePriorToInput
 
         var initialStart
         var initialEnd
@@ -74,6 +76,12 @@
 
         var undid = false
         var undoStore = []
+        var redoStore = []
+
+        var undoKeyCombo = false
+        var redoKeyCombo = false
+
+        var contextPaste = false
 
 
         // ---------- MISC EVENTS ------------- ///
@@ -84,7 +92,7 @@
             currentChar = String.fromCharCode(event.charCode)
         }
 
-        ///3333
+
 
 
         input.onpaste = function (event) {
@@ -95,25 +103,44 @@
             cutHappened = true
         }
 
+        input.oncontextmenu = function (event) {
+            console.log(event.target.value);
+            console.log(event.target.selectionStart, this.selectionEnd);
+
+            valuePriorToInput = event.target.value
+            initialStart = this.selectionStart
+            initialEnd = this.selectionEnd
+            contextPaste = true
+        }
 
         input.onkeydown = function (event) {
-
+            console.log("on key down");
 
             initialStart = this.selectionStart
             initialEnd = this.selectionEnd
 
-            valuePriorToPaste = (' ' + event.target.value).slice(1)
-
-
+            valuePriorToInput = (' ' + event.target.value).slice(1)
 
 
             // to be used later in "oninput"
             currentKeyCode = event.which
 
+            // Experimentation. Will get these from the KB:
+            undoKeyCombo =
+                (event.ctrlKey && event.which === 90) ||
+                (event.metaKey && !event.shiftKey && event.which === 90)
+
+            redoKeyCombo =
+                (event.ctrlKey && event.which === 89) ||
+                (event.metaKey && event.shiftKey && event.which === 90) ||
+                (event.ctrlKey && event.shiftKey && event.which === 90)
+
+
+            if(undoKeyCombo) console.log("undo setting");
+
             var start = this.selectionStart,
                 end = this.selectionEnd;
 
-            var value = event.target.value
 
             // Hacky. Predeclaring input.maxLength was interferring with the oninput event (likely
             // preventing it from firing).
@@ -142,7 +169,7 @@
 
 
                 if (chunkString.length === 0)
-                    chunkString = valuePriorToPaste.split(delimiter)[index]
+                    chunkString = valuePriorToInput.split(delimiter)[index]
 
                 dateArray.push(chunkString )
 
@@ -201,9 +228,18 @@
             var start = this.selectionStart,
                 end = this.selectionEnd;
 
+            // valuePriorToInput set on a keypress? No? Then it must be a right mouse on a virgin
+            // input. Use the mask instead.
+            // valuePriorToInput = !!valuePriorToInput? valuePriorToInput : mask
+
             // currentValue is value just after paste but just before display in the input. 
 
             var currentValue = this.value
+
+            // necessary for some browsers.
+            contextPaste && initialEnd-1 > initialStart?
+                contextPaste = false :
+                contextPaste = true
 
             // Correcting the left and right index of the selection. If you start at the end and go
             // back or vica versa the left and right side index of the selection can change, using
@@ -215,13 +251,22 @@
             /// --------------------------- if paste  --------------------------- ///
 
             if (pasteHappened) {
+                console.log("paste happened");
 
-                pasteHappened = false
+
+                console.log(valuePriorToInput);
+
+
+
                 var lengthOfRightSide = mask.length - rightIndex
 
                 var newRightIndex = currentValue.length - lengthOfRightSide
 
+                console.log(currentValue);
+                console.log(leftIndex, newRightIndex, leftIndex);
+
                 var rawPaste = currentValue.substr(leftIndex, newRightIndex - leftIndex)
+
 
                 var pasteArray =
                     rawPaste.split("").filter(char => ( char.match(okCharsRegex) ))
@@ -229,9 +274,10 @@
                 // Used to adjust the cursor position for when a delimiter has been hit on a paste.
                 var cursorOffset = 0
 
-                currentValue = valuePriorToPaste.replace(/./g, (match, index, string) => {
+
+                currentValue = valuePriorToInput.replace(/./g, (match, index, string) => {
                     var retVal
-                    if (rightIndex !== leftIndex) {
+                    if (rightIndex !== leftIndex && !contextPaste) {
 
                         if(index > leftIndex-1 && index < rightIndex && pasteArray.length)
                             cursorOffset++
@@ -241,7 +287,7 @@
                                 pasteArray.shift() : match
                     }
 
-                    else if (rightIndex === leftIndex) {
+                    else if (rightIndex === leftIndex || contextPaste) {
 
                         if (index > leftIndex-1 && pasteArray.length)
                             cursorOffset++
@@ -255,9 +301,10 @@
 
 
                 // this.value = mask
+                pasteHappened = false
+                contextPaste = false
 
-
-                undid? (undoStore = [valuePriorToPaste], undid = false) : (undoStore.push(valuePriorToPaste))
+                undid? (undoStore = [valuePriorToInput], undid = false) : (undoStore.push(valuePriorToInput))
 
                 this.value = coerceValidDate? fixDateMistake(currentValue) : currentValue
 
@@ -269,16 +316,16 @@
             //2222
 
             /// --------------------------- if key press  --------------------------- ///
-
             // Back space key press
-            if (currentKeyCode === 8 || cutHappened) {
+            if ((currentKeyCode === 8 || cutHappened) && !(undoKeyCombo || redoKeyCombo)) {
+                console.log("are we here?");
                 // reset the cutHappened switch after reading it
                 if (cutHappened) cutHappened = false
 
                 // when backspacing, just replace the input with the mask. I.e. "clearing it". If
                 // you make a selection in the input then backspace, replace only that selection
                 // with the same bit from the mask.
-                currentValue = valuePriorToPaste.replace(/./g, (match, index, string) => {
+                currentValue = valuePriorToInput.replace(/./g, (match, index, string) => {
                     var retVal
                     if (rightIndex !== leftIndex)
                         retVal = index > leftIndex-1 && index < rightIndex ? mask[index] : match
@@ -288,7 +335,7 @@
                     return retVal
                 })
 
-                undid? (undoStore = [valuePriorToPaste], undid = false) : (undoStore.push(valuePriorToPaste))
+                undid? (undoStore = [valuePriorToInput], undid = false) : (undoStore.push(valuePriorToInput))
 
                 this.value = currentValue
 
@@ -299,9 +346,9 @@
 
                 // current char is only truthy if a printable char key has been pressed. It is false
                 // otherwise (see above event "onkeypress")    
-            } else if(currentChar) {
-
-                currentValue = valuePriorToPaste.replace(/./g, (match, index, string) => {
+            } else if(currentChar && !(undoKeyCombo || redoKeyCombo)) {
+                console.log("else if");
+                currentValue = valuePriorToInput.replace(/./g, (match, index, string) => {
 
                     var replaceValue = currentChar.match(okCharsRegex) ? currentChar : match
 
@@ -311,7 +358,7 @@
                     return retVal
                 })
 
-                undid? (undoStore = [valuePriorToPaste], undid = false) : (undoStore.push(valuePriorToPaste))
+                undid? (undoStore = [valuePriorToInput], undid = false) : (undoStore.push(valuePriorToInput))
 
                 this.value = coerceValidDate? fixDateMistake(currentValue) : (' ' + currentValue).slice(1)
 
@@ -325,32 +372,73 @@
                 return
             }
 
-            //2222
-
-
+            console.log("before if");
             // undo or redo happened
-            if(!pasteHappened && !currentChar) {
+            if(!pasteHappened && !currentChar || undoKeyCombo || redoKeyCombo) {
+                console.log("here");
+                // Have to detect if undo or redo then, when popping undo, push on redo. Clear redo
+                // and undo at same time.
 
-//                 Have to detect if undo or redo then, when popping undo, push on redo. Clear redo
-//                 and undo at same time.
+
+                if (leftIndex >= start || undoKeyCombo) {
+                    console.log("undo")
+                    if (undoStore.length) {
+                        console.log(undoStore);
+
+                        var undoAction = undoStore.pop()
+                        redoStore.push(valuePriorToInput)
+                        console.log(redoStore);
+                        console.log(currentValue);
+                        this.value = undoAction
 
 
+                        this.setSelectionRange(start, end)
 
-                 console.log("undo or redo");
-                 console.log(undoStore.length)
+                        undid = true
 
-                console.log(currentValue);
+                    } else {
+                        this.value = [mask]
+                        this.setSelectionRange(0, 0)
+                    }
+                    // 121123121
+                } else {
+                    console.log("redo");
+                    if (redoStore.length) {
 
-                 undoStore.length ? 
-                     (this.value = undoStore.pop(), this.setSelectionRange(start, end)) : 
-                     (this.value = [mask], this.setSelectionRange(0, 0))
+                        var redoAction = redoStore.pop()
 
-                 undid = true
+                        console.log(redoStore);
+
+                        undoStore.push(valuePriorToInput)
+
+                        this.value = redoAction
+                        console.log(start, end);
+                        this.setSelectionRange(start, end)
+
+                        undid = true
+
+                    } else {
+                        console.log("here?");
+                        this.value = [mask]
+                        this.setSelectionRange(0, 0)
+                    }
+
+                }
+
+
+                // console.log("undo or redo");
+
+                console.log(initialStart, initialEnd);
+                console.log(leftIndex, rightIndex);
+                console.log(start, end);
+
+
             }
 
         }
+
         
-    </script>
+    </script>   
     
     </body>
 </html>
