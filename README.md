@@ -9,7 +9,9 @@ An input mask with undo, paste and cut, and rudimentary undo/redo support. Shoul
 
 - Safari (Same behaviour as Chrome)
 
-- Internet explorer 10 (no undo or redo. Rest is fine).
+- iOS 10.1 safari: Undo and redo broken. Rest is fine.
+
+- Internet explorer 10: no undo or redo. Rest is fine.
 
 - Internet explorer <= 9: DOES NOT WORK
 
