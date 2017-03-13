@@ -1,5 +1,18 @@
 # Input-Mask
-An input mask with undo, paste and cut (but not redo) support. Should work everywhere.
+An input mask with undo, paste and cut, and rudimentary undo/redo support. Should work everywhere.
+
+### Tested on:
+
+- Chrome (mac and windows 7 same behaviour): Issues with redo (works, mostly).
+
+- Firefox (mac and windows 7 same behaviour): Issues with undo and redo(works, mostly, but cursor pos is not good).
+
+- Safari (Same behaviour as Chrome)
+
+- Internet explorer 10 (no undo or redo. Rest is fine).
+
+- Internet explorer <= 9: DOES NOT WORK
+
 
 ### How to use:
 
